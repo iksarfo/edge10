@@ -1,0 +1,410 @@
+﻿<div id="overlay" onclick="whenNotCountingDownHide()">
+    <div id="text">3</div>
+</div>
+
+<div class="jumbotron smoked">
+    <div class="container-fluid smoked">
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-5 comic">
+                <h2>player 1</h2>
+            </div>
+            <div class="col-md-1"></div>
+            <div class="col-md-5 comic">
+                <h2>player 2</h2>
+            </div>
+            <div class="col-md-1"></div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-5 comic">
+                <select id="player1" class="form-control" onchange="promptHuman('1')"></select>
+            </div>
+            <div class="col-md-1 text-center comic"></div>
+            <div class="col-md-5">
+                <select id="player2" class="form-control" onchange="promptHuman('2')"></select>
+            </div>
+            <div class="col-md-1"></div>
+        </div>
+        
+        <div class="row" style="height: 40px"></div>
+
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <a href="#" onclick="startGame()">
+                    <img src="~/Content/play-logo.png" alt="play game" width="240px"/>
+                </a>
+            </div>
+        </div>
+
+        <div class="row" style="height: 40px"></div>
+
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-5">
+
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-4 faded">
+                            <img src="~/Content/Rock.PNG" alt="Rock" id="1" />
+                        </div>
+                        <div class="col-lg-4 faded">
+                            <img src="~/Content/Paper.PNG" alt="Paper" id="2" />
+                        </div>
+                        <div class="col-lg-4 faded">
+                            <img src="~/Content/Scissors.PNG" alt="Scissors" id="3" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-1"></div>
+            <div class="col-md-5">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-4 faded">
+                            <img src="~/Content/Rock.PNG" alt="Rock" id="7" />
+                        </div>
+                        <div class="col-lg-4 faded">
+                            <img src="~/Content/Paper.PNG" alt="Paper" id="8" />
+                        </div>
+                        <div class="col-lg-4 faded">
+                            <img src="~/Content/Scissors.PNG" alt="Scissors" id="9" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-1"></div>
+        </div>
+
+        <div class="row white-background">
+            <div class="col-md-1"></div>
+            <div class="col-md-5">
+                <div class="container">
+                    <div class="row" id="keys-for-player-1">
+                        <div class="col-lg-4 text-center">
+                            <img src="~/Content/key1.PNG" height="60" width="60" />
+                        </div>
+                        <div class="col-lg-4 text-center">
+                            <img src="~/Content/key2.PNG" height="60" width="60" />
+                        </div>
+                        <div class="col-lg-4 text-center">
+                            <img src="~/Content/key3.PNG" height="60" width="60" />
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-1"></div>
+            <div class="col-md-5">
+                <div class="container">
+                    <div class="row" id="keys-for-player-2">
+                        <div class="col-lg-4 text-center">
+                            <img src="~/Content/key7.PNG" height="80" width="80" />
+                        </div>
+                        <div class="col-lg-4 text-center">
+                            <img src="~/Content/key8.PNG" height="80" width="80" />
+                        </div>
+                        <div class="col-lg-4 text-center">
+                            <img src="~/Content/key9.PNG" height="80" width="80" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-1"></div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-5 comic">
+                <p id="human-instruction-1">When the countdown ends choose:
+                    <br />rock, paper or scissors by pressing
+                    <br />[1], [2] or [3], respectively</p>
+            </div>
+            <div class="col-md-1"></div>
+            <div class="col-md-5 comic">
+                <p id="human-instruction-2">When the countdown ends choose:
+                    <br />rock, paper or scissors by pressing
+                    <br />[7], [8] or [9], respectively</p>
+            </div>
+            <div class="col-md-1"></div>
+        </div>
+
+        <div class="row hidden">
+            <div class="col-md-3"><input type="text" id="player1-chooses"></div>
+            <div class="col-md-3"><input type="text" id="player1-chose"></div>
+            <div class="col-md-3"><input type="text" id="player2-chooses"></div>
+            <div class="col-md-3"><input type="text" id="player2-chose"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    const Players = 'http://localhost:50010/api/players';
+    const MaxTimeAllowed = 500;
+    const overlay = document.getElementById("overlay");
+    const counter = document.getElementById('text');
+    const player1s = document.getElementById('player1');
+    const choice1 = document.getElementById('player1-chooses');
+    const previous1 = document.getElementById('player1-chose');
+    const player2s = document.getElementById('player2');
+    const choice2 = document.getElementById('player2-chooses');
+    const previous2 = document.getElementById('player2-chose');
+    const escapeKeyCode = 27;
+    const humanPlayer = 0;
+    const tacticalPlayer = 2;
+    const player1MinKey = 1;
+    const player2MinKey = 7;
+
+    let playAllowed = false;
+    let gameStats = {
+        player1Wins: 0,
+        player2Wins: 0
+    };
+
+    player1s.length = 0;
+    player2s.length = 0;
+
+    fetch(Players)
+        .then(data => { return data.json() })
+        .then(players => {
+            listPlayers(player1s, players); 
+            listPlayers(player2s, players); 
+        });
+
+    function listPlayers(options, players) {
+        players.forEach(function(player) {
+            const option = document.createElement('option');
+
+            option.text = player.Type;
+            option.value = player.Type;
+            options.add(option);
+        });
+    }
+
+    function promptHuman(number) {
+        const player = document.getElementById('player' + number);
+        const instruction = document.getElementById('human-instruction-' + number);
+        const keysPrompt = document.getElementById('keys-for-player-' + number);
+
+        instruction.style.display =
+        keysPrompt.style.display =
+            typeofPlayer(player) === humanPlayer
+                ? 'block'
+                : 'none';
+    }
+
+    function whenNotCountingDownHide() {
+        if (["1", "2", "3"].includes(counter.innerText)) {
+            return;
+        }
+
+        hideOverlay();
+    }
+
+    function decrementCounter() {
+        counter.innerText = counter.innerText - 1;
+    }
+
+    function showOverlay(textShown) {
+        counter.innerText = textShown;
+        overlay.style.display = 'block';
+    }
+
+    function hideOverlay() {
+        overlay.style.display = 'none';
+    }
+
+    function selectWeapon(index) {
+        if (index) {
+            const weapon = document.getElementById(index);
+            console.log(index);
+
+            if (weapon.parentElement) {
+                weapon.parentElement.className = 'col-lg-4';
+            }
+        }
+    }
+
+    function deselectWeapon(index) {
+        if (index) {
+            const weapon = document.getElementById(index);
+            weapon.parentElement.className = 'col-lg-4 faded';
+        }
+    }
+
+    function resetGame() {
+        deselectWeapon(choice1.value);
+        previous1.value = choice1.value;
+        choice1.value = null;
+
+        deselectWeapon(choice2.value);
+        previous2.value = choice2.value;
+        choice2.value = null;
+    }
+
+    function bothNonHumanPlayers() {
+        return typeofPlayer(player1s) !== humanPlayer
+            && typeofPlayer(player2s) !== humanPlayer;
+    }
+
+    function startGame() {
+        resetGame();
+        showOverlay('3');
+
+        var countDown = setInterval(function() {
+            decrementCounter();
+        }, 1000);
+
+        setTimeout(function() {
+            playAllowed = true;
+            hideOverlay();
+            clearInterval(countDown);
+
+            if (bothNonHumanPlayers()) {
+                checkWinner();
+            }
+        }, 2950);
+    }
+
+    function asHumanInput(selected, turnToKeyDown) {
+        return selected !== humanPlayer
+            ? turnToKeyDown
+            : 0;
+    }
+
+    function updateStats(gameState) {
+        gameStats.player1Wins = gameState.Player1Wins;
+        gameStats.player2Wins = gameState.Player2Wins;
+    }
+
+    function display(selected) {
+        if (selected.Player1Type === humanPlayer) {
+            choice1.value = (selected.Player1 != null && selected.Player1 !== 0)
+                ? Number(selected.Player1)
+                : choice1.value;
+        } else {
+            choice1.value = Number(selected.Player1) + player1MinKey;
+        }
+
+        if (selected.Player2Type === humanPlayer) {
+            choice2.value = (selected.Player2 != null && selected.Player2 !== 0)
+                ? Number(selected.Player2)
+                : choice2.value;
+        } else {
+            choice2.value = Number(selected.Player2) + player2MinKey;
+        }
+
+        selectWeapon(choice1.value);
+        selectWeapon(choice2.value);
+    }
+
+    function isGameOver(result) {
+        return result.Text;
+    }
+
+    function announceWinner(result) {
+        showOverlay(result.Text);
+    }
+
+    function hasPlayed(choice) {
+        return choice.value;
+    }
+
+    function typeofPlayer(player) {
+        return player.selectedIndex;
+    }
+
+    function bothHumanPlayersAndBothPlayed() {
+        if (typeofPlayer(player1s) !== humanPlayer) {
+            return false;
+        }
+
+        if (typeofPlayer(player2s) !== humanPlayer) {
+            return false;
+        }
+
+        if (!hasPlayed(choice1)) {
+            return false;
+        }
+
+        if (!hasPlayed(choice2)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    function floor(selection) {
+        return selection
+            ? selection
+            : 0;
+    }
+
+    function checkWinner() {
+        const player1Selection =
+            typeofPlayer(player1s) === tacticalPlayer
+                ? floor(previous1.value)
+                : choice1.value;
+
+        const player2Selection =
+            typeofPlayer(player2s) === tacticalPlayer
+                ? floor(previous2.value)
+                : choice2.value;
+
+        const gameResult =
+                'http://localhost:50010/api/game?' + 
+                'player1=' + player1Selection +
+                '&player1Type=' + typeofPlayer(player1s) + 
+                '&player1Wins=' + gameStats.player1Wins + 
+                '&player2=' + player2Selection +
+                '&player2Type=' + typeofPlayer(player2s) +
+                '&player2Wins=' + gameStats.player2Wins + 
+                '&BothHumanPlayersPlayed=' + bothHumanPlayersAndBothPlayed();
+
+        fetch(gameResult)
+            .then(data => { return data.json() })
+            .then(result => {
+                display(result.GameState);
+                updateStats(result.GameState);
+
+                if (isGameOver(result)) {
+                    announceWinner(result);
+                    playAllowed = false;
+                };
+            });
+    }
+
+    document.body.addEventListener('keydown', function(e) {
+        const digitOffset = 48;
+        const digitKeyed = e.keyCode - digitOffset;
+
+        if (!playAllowed) {
+            if (e.keyCode === escapeKeyCode) {
+                hideOverlay();
+            }
+
+            return;
+        }
+
+        if (digitKeyed >= 1 && 
+            digitKeyed <= 3 && 
+            typeofPlayer(player1s) === 0 &&
+            !choice1.value) {
+            choice1.value = digitKeyed;
+            selectWeapon(digitKeyed);
+
+            checkWinner();
+        }
+
+        if (digitKeyed >= 7 &&
+            digitKeyed <= 9 && 
+            typeofPlayer(player2s) === 0 &&
+            !choice2.value) {
+            choice2.value = digitKeyed;
+            selectWeapon(digitKeyed);
+
+            checkWinner();
+        }
+    });
+</script>
